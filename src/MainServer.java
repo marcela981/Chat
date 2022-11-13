@@ -1,35 +1,37 @@
+import Modelo.Despachador;
 
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
 
-public class MainServer {
+public class MainServer
+{
     public static void main(String[] args) {
-        String hostName = args[0];
-        int portNumber = Integer.parseInt(args[1]);
 
-        try {
+        int portNumber = Integer.parseInt(args[0]);
+        ArrayList<Despachador> escritores = new ArrayList<>();
+
+        try
+        {
             ServerSocket serverSocket = new ServerSocket(portNumber);
-            while (true) {
+            while (true)
+            {
                 Socket clientSocket = serverSocket.accept();
-                PrintWriter out =
-                        new PrintWriter(clientSocket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(clientSocket.getInputStream()));
 
-                out.println("Bienvenido");
+                Despachador lector = new Despachador(clientSocket, "lector");
+                lector.start();
+                lector.escritores = escritores;
 
-                String inputLine;
+                Despachador escritor = new Despachador(clientSocket, "escritor");
+                escritores.add(escritor);
+                escritor.start();
 
-                while ((inputLine = in.readLine()) != null) {
-                    System.out.println(inputLine);
-                    if (inputLine.equals("Bye."))
-                        break;
-                }
-                clientSocket.close();
+                //clientSocket.close();
             }
-
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             System.out.println("Error: " + e.getMessage());
         }
+
     }
 }

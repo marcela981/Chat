@@ -1,37 +1,36 @@
+import gui.Ventana;
+import Modelo.Despachador;
+
 import java.net.*;
 import java.io.*;
 
-
-public class MainClient {
-    public static void main(String[] args) {
+public class MainClient
+{
+    public static void main(String[] args)
+    {
         String hostName = args[0];
         int portNumber = Integer.parseInt(args[1]);
 
-        try {
+        Ventana gui = new Ventana();
+        gui.setVisible(true);
+
+        try
+        {
             Socket kkSocket = new Socket(hostName, portNumber);
-            PrintWriter out = new PrintWriter(kkSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(kkSocket.getInputStream()));
 
-            BufferedReader stdIn =
-                    new BufferedReader(new InputStreamReader(System.in));
+            Despachador lector = new Despachador(kkSocket, "lector");
+            lector.gui = gui;
+            lector.start();
 
-            String fromServer;
-            while ((fromServer = in.readLine()) != null) {
-                System.out.println("Server: " + fromServer);
-                if (fromServer.equals("Bye."))
-                    break;
+            Despachador escritor = new Despachador(kkSocket, "escritor");
+            escritor.gui = gui;
+            gui.despachador = escritor;
+            escritor.start();
 
-                String fromUser = stdIn.readLine();
-                if (fromUser != null) {
-                    System.out.println("Client: " + fromUser);
-                    out.println(fromUser);
-                }
-            }
-
-        } catch (Exception e) {
+            gui.conectar();
+        } catch (Exception e)
+        {
             System.out.println("Error: " + e.getMessage());
-
         }
     }
 }
